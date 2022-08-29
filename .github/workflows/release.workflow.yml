@@ -1,0 +1,61 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    container: flecs/flecs-build
+
+    strategy:
+      matrix:
+        arch: ["amd64", "armhf", "arm64"]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: "Build and package"
+        run: |
+          make ARCH=${{ matrix.arch }} all
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v2
+        with:
+          name: packages
+          path: build/*.deb
+          retention-days: 1
+
+  test:
+    needs: build
+    runs-on: ubuntu-20.04
+    container: flecs/flecs-build
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Download workflow artifacts
+        uses: actions/download-artifact@v2
+
+      - name: "Test: amd64"
+        run: |
+          make ARCH=amd64 test
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Download workflow artifacts
+        uses: actions/download-artifact@v2
+
+      - name: Deploy packages
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.MP_GITHUB_SERVER }}
+          username: ${{ secrets.MP_GITHUB_USER }}
+          key: ${{ secrets.MP_GITHUB_SSH_KEY }}
+          passphrase: ${{ secrets.MP_GITHUB_SSH_KEY_PW }}
+          source: "packages/*.deb"
+          target: ${{ secrets.MP_GITHUB_RELEASE_DIR }}
+          strip_components: 1
