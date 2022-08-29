@@ -1,0 +1,42 @@
+name: pull-request
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    container: flecs/flecs-build
+
+    strategy:
+      matrix:
+        arch: ["amd64", "armhf", "arm64"]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: "Build package"
+        run: |
+          make ARCH=${{ matrix.arch }} all
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v2
+        with:
+          name: packages
+          path: build/*.deb
+          retention-days: 1
+
+  test:
+    needs: build
+    runs-on: ubuntu-20.04
+    container: flecs/flecs-build
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Download workflow artifacts
+        uses: actions/download-artifact@v2
+
+      - name: "Test: native"
+        run: |
+          make test
