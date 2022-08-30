@@ -15,14 +15,14 @@
 ARCH?=amd64
 BUILD_DIR_BASE=build
 DISTRO?=debian
-DISTRO_VERSION?=buster
+SUITE?=buster
 DOCKER_VERSION?=20.10.17
 DOCKER_RELEASE?=3
 MAPPED_ARCH=$(call map_arch)
 
 BASE_URL=https://download.docker.com/linux
-BUILD_DIR:=$(BUILD_DIR_BASE)/$(ARCH)/$(DISTRO)/$(DISTRO_VERSION)/docker-$(DOCKER_VERSION)
-DEB_NAME=$*_$(DOCKER_VERSION)~$(DOCKER_RELEASE)-0~$(DISTRO)-$(DISTRO_VERSION)_$(ARCH).deb
+BUILD_DIR:=$(BUILD_DIR_BASE)/$(ARCH)/$(DISTRO)/$(SUITE)/docker-$(DOCKER_VERSION)
+DEB_NAME=$*_$(DOCKER_VERSION)~$(DOCKER_RELEASE)-0~$(DISTRO)-$(SUITE)_$(ARCH).deb
 
 define map_arch
 $(subst arm64,aarch64,$(subst amd64,x86_64,$(ARCH)))
@@ -45,7 +45,7 @@ docker-ce: $(BUILD_DIR_BASE)/flecs-docker-ce$(DEB_NAME)
 $(BUILD_DIR)/%.deb:
 	rm -rf $(BUILD_DIR)/$* && mkdir -p $(BUILD_DIR)/$*
 ifeq ($(filter-out debian ubuntu,$(DISTRO)),)
-	wget --quiet --output-document=$@ $(BASE_URL)/$(DISTRO)/dists/$(DISTRO_VERSION)/pool/stable/$(ARCH)/$(DEB_NAME)
+	wget --quiet --output-document=$@ $(BASE_URL)/$(DISTRO)/dists/$(SUITE)/pool/stable/$(ARCH)/$(DEB_NAME)
 endif
 	dpkg-deb -R $(BUILD_DIR)/$*.deb $(BUILD_DIR)/$*
 
@@ -81,7 +81,7 @@ test-%: %
 		--build-arg DOCKER_VERSION=$(DOCKER_VERSION) \
 		--build-arg DOCKER_RELEASE=$(DOCKER_RELEASE) \
 		--build-arg DISTRO=$(DISTRO) \
-		--build-arg DISTRO_VERSION=$(DISTRO_VERSION) \
+		--build-arg SUITE=$(SUITE) \
 		--build-arg PRODUCT=$* \
 		--file test/Dockerfile.$* .
 	docker run --rm --privileged flecs-test-$*:$(DOCKER_VERSION)
