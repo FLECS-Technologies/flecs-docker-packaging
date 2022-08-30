@@ -12,12 +12,18 @@ jobs:
     strategy:
       matrix:
         arch: ["amd64", "armhf", "arm64"]
+        suite: ["buster", "bullseye"]
+        include:
+          - suite: buster
+            distro: debian
+          - suite: bullseye
+            distro: debian
 
     steps:
       - uses: actions/checkout@v2
       - name: "Build package"
         run: |
-          make ARCH=${{ matrix.arch }} all
+          make ARCH=${{ matrix.arch }} DISTRO=${{ matrix.distro }} SUITE=${{ matrix.suite }} all
 
       - name: Upload packages
         uses: actions/upload-artifact@v2
@@ -30,6 +36,11 @@ jobs:
     needs: build
     runs-on: ubuntu-20.04
     container: flecs/flecs-build
+
+    strategy:
+      matrix:
+        distro: ["debian"]
+        suite: ["buster", "bullseye"]
 
     steps:
       - uses: actions/checkout@v2

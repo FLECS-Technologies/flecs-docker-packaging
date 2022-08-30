@@ -20,7 +20,7 @@ DOCKER_VERSION?=20.10.17
 DOCKER_RELEASE?=3
 MAPPED_ARCH=$(call map_arch)
 
-BASE_URL=https://download.docker.com/linux/$(DISTRO)
+BASE_URL=https://download.docker.com/linux
 BUILD_DIR:=$(BUILD_DIR_BASE)/$(ARCH)/$(DISTRO)/$(DISTRO_VERSION)/docker-$(DOCKER_VERSION)
 DEB_NAME=$*_$(DOCKER_VERSION)~$(DOCKER_RELEASE)-0~$(DISTRO)-$(DISTRO_VERSION)_$(ARCH).deb
 
@@ -45,15 +45,14 @@ docker-ce: $(BUILD_DIR_BASE)/flecs-docker-ce$(DEB_NAME)
 $(BUILD_DIR)/%.deb:
 	rm -rf $(BUILD_DIR)/$* && mkdir -p $(BUILD_DIR)/$*
 ifeq ($(filter-out debian ubuntu,$(DISTRO)),)
-	wget --quiet --output-document=$@ $(BASE_URL)/dists/$(DISTRO_VERSION)/pool/stable/$(ARCH)/$(DEB_NAME)
+	wget --quiet --output-document=$@ $(BASE_URL)/$(DISTRO)/dists/$(DISTRO_VERSION)/pool/stable/$(ARCH)/$(DEB_NAME)
 endif
 	dpkg-deb -R $(BUILD_DIR)/$*.deb $(BUILD_DIR)/$*
 
-$(BUILD_DIR)/docker-static.tgz: DISTRO=static
 $(BUILD_DIR)/docker-static.tgz:
 	rm -rf $(BUILD_DIR)/static && mkdir -p $(BUILD_DIR)/static
-	wget --quiet --output-document=$(BUILD_DIR)/docker-static.tgz $(BASE_URL)/stable/$(MAPPED_ARCH)/docker-$(DOCKER_VERSION).tgz
-	tar -C $(BUILD_DIR)/static -xf $(BUILD_DIR)/docker-static.tgz
+	wget --quiet --output-document=$@ $(BASE_URL)/static/stable/$(MAPPED_ARCH)/docker-$(DOCKER_VERSION).tgz
+	tar -C $(BUILD_DIR)/static -xf $@
 
 .PRECIOUS: $(BUILD_DIR)/flecs-%
 $(BUILD_DIR)/flecs-%: $(BUILD_DIR)/docker-static.tgz $(BUILD_DIR)/%.deb
