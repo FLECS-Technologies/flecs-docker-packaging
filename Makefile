@@ -71,6 +71,7 @@ $(BUILD_DIR_BASE)/flecs-%$(DEB_NAME): $(BUILD_DIR)/flecs-%
 	sed -i "s/Package:.*/Package: flecs-docker-ce/" $</DEBIAN/control
 	sed -i "s/Maintainer:.*/Maintainer: FLECS Technologies GmbH <info@flecs.tech>/" $</DEBIAN/control
 	sed -i "s/Depends:.*/Depends: containerd.io (>= 1.4.1), docker-ce-cli, iptables, libseccomp2 (>= 2.3.0), libc6 (>= 2.4)/" $</DEBIAN/control
+	sed -i "/^Depends:.*/a Provides: docker-ce" $</DEBIAN/control
 	sed -i "s/Conflicts:.*/Conflicts: docker-ce, docker (<< 1.5~), docker-engine, docker-engine-cs, docker.io, lxc-docker, lxc-docker-virtual-package/" $</DEBIAN/control
 	sed -i "s/Replaces:.*/Replaces: docker-engine, docker-ce/" $</DEBIAN/control
 	sed -i "s/Installed-Size:.*/Installed-Size: $(shell du -s --exclude=DEBIAN/** $< | cut -f1)/" $</DEBIAN/control
