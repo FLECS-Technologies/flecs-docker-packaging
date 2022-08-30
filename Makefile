@@ -34,6 +34,9 @@ all: docker-ce
 .PHONY: test
 test: test-docker-ce
 
+.PHONY: latest
+latest: latest-docker-ce
+
 .PHONY: clean
 clean:
 	rm -rf $(BUILD_DIR_BASE)/
@@ -49,13 +52,13 @@ ifeq ($(filter-out debian ubuntu,$(DISTRO)),)
 endif
 	dpkg-deb -R $(BUILD_DIR)/$*.deb $(BUILD_DIR)/$*
 
-$(BUILD_DIR)/docker-static.tgz:
+$(BUILD_DIR)/static/docker:
 	rm -rf $(BUILD_DIR)/static && mkdir -p $(BUILD_DIR)/static
 	wget --quiet --output-document=$@ $(BASE_URL)/static/stable/$(MAPPED_ARCH)/docker-$(DOCKER_VERSION).tgz
 	tar -C $(BUILD_DIR)/static -xf $@
 
 .PRECIOUS: $(BUILD_DIR)/flecs-%
-$(BUILD_DIR)/flecs-%: $(BUILD_DIR)/docker-static.tgz $(BUILD_DIR)/%.deb
+$(BUILD_DIR)/flecs-%: $(BUILD_DIR)/static/docker $(BUILD_DIR)/%.deb
 	cp -r $(BUILD_DIR)/$* $(BUILD_DIR)/flecs-$*
 	@for i in `find $(BUILD_DIR)/$*/usr/bin/ -type f -executable`; do \
 		cp -pf $(BUILD_DIR)/static/docker/$$(basename $${i}) $(BUILD_DIR)/flecs-$*/usr/bin/; \
@@ -85,3 +88,6 @@ test-%: %
 		--build-arg PRODUCT=$* \
 		--file test/Dockerfile.$* .
 	docker run --rm --privileged flecs-test-$*:$(DOCKER_VERSION)
+
+latest-%: %
+	@echo -n "$(DOCKER_VERSION)~$(DOCKER_RELEASE)-0" >$(BUILD_DIR_BASE)/latest-$*
