@@ -27,7 +27,7 @@ ARG PRODUCT
 
 RUN apt-get update
 
-RUN apt-get -y install curl gnupg
+RUN apt-get -y --no-install-recommends install ca-certificates curl gnupg
 
 COPY test/entrypoint.sh /
 
@@ -37,6 +37,6 @@ RUN /tmp/install-depends.${PRODUCT}.sh
 
 COPY ${BUILD_DIR_BASE}/flecs-${PRODUCT}_${DOCKER_VERSION}~${DOCKER_RELEASE}-0~${DISTRO}-${SUITE}_${ARCH}.deb /tmp/
 
-RUN apt-get -y install /tmp/*.deb
+RUN apt-get -y --no-install-recommends install /tmp/*.deb
 
 ENTRYPOINT [ "/entrypoint.sh" ]
