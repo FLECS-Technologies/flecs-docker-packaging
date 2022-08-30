@@ -76,7 +76,7 @@ $(BUILD_DIR_BASE)/flecs-%$(DEB_NAME): $(BUILD_DIR)/flecs-%
 	sed -i "s/Installed-Size:.*/Installed-Size: $(shell du -s --exclude=DEBIAN/** $< | cut -f1)/" $</DEBIAN/control
 	@dpkg-deb --verbose --root-owner-group -Z gzip --build $< $@
 
-test-%: %
+test-%:
 	docker build \
 		--tag flecs-test-$*:$(DOCKER_VERSION) \
 		--build-arg ARCH=$(ARCH) \
@@ -89,5 +89,5 @@ test-%: %
 		--file test/Dockerfile.$* .
 	docker run --rm --privileged flecs-test-$*:$(DOCKER_VERSION)
 
-latest-%: %
+latest-%:
 	@echo -n "$(DOCKER_VERSION)~$(DOCKER_RELEASE)-0" >$(BUILD_DIR_BASE)/latest-$*
