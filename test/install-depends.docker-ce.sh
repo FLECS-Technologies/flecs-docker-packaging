@@ -21,4 +21,4 @@ echo \
   "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] \
   https://download.docker.com/linux/${DISTRO} ${SUITE} stable" >/etc/apt/sources.list.d/docker.list
 
-apt-get update && apt-get -y install docker-ce-cli containerd.io
+apt-get update && apt-get -y --no-install-recommends install docker-ce-cli containerd.io
