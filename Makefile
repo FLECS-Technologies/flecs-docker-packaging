@@ -63,8 +63,8 @@ $(BUILD_DIR)/flecs-%: $(BUILD_DIR)/static/docker $(BUILD_DIR)/%.deb
 	@for i in `find $(BUILD_DIR)/$*/usr/bin/ -type f -executable`; do \
 		cp -pf $(BUILD_DIR)/static/docker/$$(basename $${i}) $(BUILD_DIR)/flecs-$*/usr/bin/; \
 	done
-	@if [ "$(ARCH)" == "armhf" ]; then \
-		./scripts/patch-dockerd.sh $(BUILD_DIR)/flecs-$*/usr/bin/dockerd; \
+	@if [ "$(ARCH)" = "armhf" ]; then \
+		bash ./scripts/patch-dockerd.sh $(BUILD_DIR)/flecs-$*/usr/bin/dockerd; \
 	fi
 
 $(BUILD_DIR_BASE)/flecs-%$(DEB_NAME): $(BUILD_DIR)/flecs-%
@@ -90,4 +90,5 @@ test-%:
 	docker run --rm --privileged flecs-test-$*:$(DOCKER_VERSION)
 
 latest-%:
+	@mkdir -p $(BUILD_DIR_BASE)
 	@echo -n "$(DOCKER_VERSION)~$(DOCKER_RELEASE)-0" >$(BUILD_DIR_BASE)/latest-$*

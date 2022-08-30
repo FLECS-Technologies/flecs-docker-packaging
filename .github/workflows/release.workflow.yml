@@ -56,9 +56,20 @@ jobs:
     needs: test
     runs-on: ubuntu-20.04
 
+    strategy:
+      matrix:
+        distro: ["debian"]
+        suite: ["buster", "bullseye"]
+
     steps:
+      - uses: actions/checkout@v2
+
       - name: Download workflow artifacts
         uses: actions/download-artifact@v2
+
+      - name: Generate version file
+        run: |
+          make latest
 
       - name: Deploy packages
         uses: appleboy/scp-action@master
@@ -67,6 +78,17 @@ jobs:
           username: ${{ secrets.MP_GITHUB_USER }}
           key: ${{ secrets.MP_GITHUB_SSH_KEY }}
           passphrase: ${{ secrets.MP_GITHUB_SSH_KEY_PW }}
-          source: "packages/*.deb"
-          target: ${{ secrets.MP_GITHUB_RELEASE_DIR }}
+          source: "build/*${{ matrix.distro }}*${{ matrix.suite }}*.deb"
+          target: ${{ secrets.MP_DOCKER_RELEASE_DIR }}/${{ matrix.distro }}/${{ matrix.suite }}
+          strip_components: 1
+
+      - name: Update latest file
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.MP_GITHUB_SERVER }}
+          username: ${{ secrets.MP_GITHUB_USER }}
+          key: ${{ secrets.MP_GITHUB_SSH_KEY }}
+          passphrase: ${{ secrets.MP_GITHUB_SSH_KEY_PW }}
+          source: "build/latest*"
+          target: ${{ secrets.MP_DOCKER_RELEASE_DIR }}/${{ matrix.distro }}/${{ matrix.suite }}
           strip_components: 1
