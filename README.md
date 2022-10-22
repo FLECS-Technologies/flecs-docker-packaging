@@ -1,6 +1,6 @@
 # FLECS Docker (Re-)Packaging
 
-Current (v20.10.17) static Docker builds for armhf contain an invalid entry in
+Current (v20.10.20) static Docker builds for armhf contain an invalid entry in
 the dockerd binary's .got section. This leads to an immediate crash when
 launching the application as Thumb2 code is wrongly executed in ARM state.
 
